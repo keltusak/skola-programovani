@@ -1,4 +1,4 @@
-#!/usr/bin/env python3#!/usr/bin/env python3
+#!/usr/bin/env python3
 
 import tkinter as tk
 from tkinter import HORIZONTAL, LEFT, TOP
@@ -135,9 +135,24 @@ class Application(tk.Tk):
             f.write(self.canvas.cget("background")+"\n")
             for c in self.canvaslist:
                 f.write(c.cget("background")+"\n")
-
+        """        
     def colorLoad(self):
-        pass
+        if not exists("colors.txt"):
+            return
+        with open("colors.txt", "r") as f:
+            try:
+                color = f.readline().strip()
+                r = int(self.copycolor[1:3], 16)
+                g = int(self.copycolor[3:5], 16)
+                b = int(self.copycolor[5:], 16)
+                self.varR.set(r)
+                self.varG.set(g)
+                self.varB.set(b)
+                for canvas in self.canvaslist:
+                    canvas.config(background=f.readline().strip())
+            except:
+
+        """
 
     def quit(self, event=None):
         self.colorSave()
