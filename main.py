@@ -35,7 +35,7 @@ class Application(tk.Tk):
         super().__init__(className=self.name)
         self.title(self.name)
         self.bind("<Escape>", self.destroy)
-        self.lblMain = tk.Label(self, text="Color Mishmash")
+        self.lblMain = tk.Label(self, text="Color Mishmash", font="Terminus 22", fg="#12abc3")
         self.lblMain.bind("<Button-1>", self.timestringHandler)
         self.btnQuit = tk.Button(self, text="Quit", command=self.quit)
         self.frameR = tk.Frame(master=self)
@@ -140,6 +140,7 @@ class Application(tk.Tk):
         g = self.scaleG.get()
         b = self.scaleB.get()
         self.canvas.config(background=f"#{r:02X}{g:02X}{b:02X}")
+        self.lblMain.config(foreground=f"#{r:02X}{g:02X}{b:02X}")
 
     def colorSave(self):
         with open("colors.txt", "w") as f:
@@ -166,7 +167,7 @@ class Application(tk.Tk):
 
     def timestring(self):
         current_time = datetime.now()
-        string = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        string = current_time.strftime("%y-%m-%d %H:%M:%S")
         self.lblMain.configure(text=string)
         self.timestring_id = self.after(1000, self.timestring)
 
