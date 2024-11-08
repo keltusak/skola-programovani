@@ -5,7 +5,7 @@ operation1 = {}
 
 operation2["+"]=lambda a,b: a+b
 operation2["-"]= operator.sub
-operation2["*"]= operator.matmul
+operation2["*"]= operator.mul
 operation2["/"]= operator.truediv
 operation2["//"]= operator.floordiv
 operation2["%"]= lambda a,b: a%b
