@@ -1,0 +1,113 @@
+import tkinter as tk
+from tkinter import messagebox
+from os.path import basename, splitext
+from operace import operation2, operation1
+
+class MyEntry(tk.Entry):
+    def __init__(self, master=None, cnf={}, **kw):
+        super().__init__(master, cnf, **kw)
+        if "textvariable" not in kw:
+            self.variable = tk.StringVar()
+            self.config(textvariable=self.variable)
+        else:
+            self.variable = kw["textvariable"]
+
+    @property
+    def value(self):
+        return self.variable.get()
+
+    @value.setter
+    def value(self, new: str):
+        self.variable.set(new)
+
+class MyListbox(tk.Listbox):
+    def pop(self):
+        if self.size() > 0:
+            x = self.get("end")
+            self.delete("end")
+            return x
+        else:
+            raise IndexError("The stack is empty")
+
+class Application(tk.Tk):
+    name = basename(splitext(basename(__file__.capitalize()))[0])
+    name: str = "Revcal"
+    font_settings = ("Helvetica", 14)
+
+    def __init__(self):
+        super().__init__(className=self.name)
+        self.option_add("*Font", self.font_settings)
+        self.title(self.name)
+        self.bind("<Escape>", self.destroy)
+        
+        self.lbl = tk.Label(self, text="Reverzní kalkulátor")
+        self.listbox = MyListbox(master=self)
+        self.entry = MyEntry(master=self)
+        self.status = tk.Label(self, text="Vítejte!", bd=1, relief=tk.SUNKEN, anchor=tk.W)
+        self.history = []
+        
+        self.btn_quit = tk.Button(self, text="Ukončit", command=self.destroy)
+        
+        self.entry.bind("<Return>", self.enter_handler)
+        self.entry.bind("<KP_Enter>", self.enter_handler)
+        
+        self.lbl.pack()
+        self.listbox.pack()
+        self.entry.pack()
+        self.status.pack(fill=tk.X)
+        self.btn_quit.pack()
+
+        self.entry.focus()
+
+    def enter_handler(self, event):
+        input_text = self.entry.value.strip()
+        if not input_text:
+            self.status.config(text="Prázdný vstup")
+            return
+        
+        self.history.append(input_text)
+        self.process_input(input_text)
+        self.entry.value = ""
+        self.listbox.see("end")
+
+    def process_input(self, input_text):
+        tokens = input_text.split()
+        for token in tokens:
+            try:
+                self.listbox.insert("end", float(token))
+            except ValueError:
+                try:
+                    self.token_process(token)
+                except (IndexError, ZeroDivisionError) as e:
+                    self.status.config(text=f"Chyba: {str(e)}")
+                    messagebox.showerror("Chyba", str(e))
+                    return
+        self.status.config(text="Vstup zpracován úspěšně")
+
+    def token_process(self, token):
+        if token in operation2:
+            try:
+                b = float(self.listbox.pop())
+                a = float(self.listbox.pop())
+                if token == "/" and b == 0:
+                    raise ZeroDivisionError("Dělení nulou není povoleno")
+                r = operation2[token](a, b)
+                self.listbox.insert("end", r)
+            except IndexError:
+                raise IndexError("Nedostatek čísel v zásobníku pro binární operaci")
+
+        elif token in operation1:
+            try:
+                a = float(self.listbox.pop())
+                r = operation1[token](a)
+                self.listbox.insert("end", r)
+            except IndexError:
+                raise IndexError("Nedostatek čísel v zásobníku pro unární operaci")
+        else:
+            raise ValueError(f"Neznámý operátor nebo hodnota: {token}")
+
+    def destroy(self, event=None):
+        super().destroy()
+
+app = Application()
+app.mainloop()
